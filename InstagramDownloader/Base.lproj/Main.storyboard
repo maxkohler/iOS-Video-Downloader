@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8187.4" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Pam-zT-sWi">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8151.3"/>
+    </dependencies>
+    <scenes>
+        <!--Instagram & Vine Downloader-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="background.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="D9l-Ro-3YY">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="89q-5j-8vh">
+                                <rect key="frame" x="20" y="656" width="176" height="60"/>
+                                <state key="normal" title="Tap to Paste URL" backgroundImage="button1.png"/>
+                                <connections>
+                                    <action selector="pasteUrlButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qzJ-Mq-i4i"/>
+                                </connections>
+                            </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progressViewStyle="bar" translatesAutoresizingMaskIntoConstraints="NO" id="vmW-x0-xb0">
+                                <rect key="frame" x="20" y="615" width="374" height="2.5"/>
+                                <color key="progressTintColor" red="0.53333333333333333" green="0.25098039215686274" blue="0.65490196078431373" alpha="1" colorSpace="calibratedRGB"/>
+                            </progressView>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="46s-3c-Tj1">
+                                <rect key="frame" x="20" y="181" width="374" height="374"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MlT-iI-yPe">
+                                <rect key="frame" x="87" y="83" width="240" height="80"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g52-qs-hWc">
+                                <rect key="frame" x="219" y="656" width="175" height="60"/>
+                                <state key="normal" title="Download Video" backgroundImage="button1.png">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="saveButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="NgR-5c-IuK"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Instagram &amp; Vine Downloader" id="3wK-oG-ToH"/>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
+                    <connections>
+                        <outlet property="loadButtonOutlet" destination="89q-5j-8vh" id="8tu-Sk-eko"/>
+                        <outlet property="logo" destination="MlT-iI-yPe" id="8XS-HJ-9pL"/>
+                        <outlet property="progress" destination="vmW-x0-xb0" id="Pcx-RY-IgR"/>
+                        <outlet property="saveButtonOutlet" destination="g52-qs-hWc" id="UEJ-Nn-aol"/>
+                        <outlet property="viewForPlayer" destination="46s-3c-Tj1" id="HNb-e4-fnB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1117" y="418"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Rth-Nq-vb6">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Pam-zT-sWi" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina55"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Hi0-FI-TRW">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="O1R-u3-S3e"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rvw-LN-FUu" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="305" y="418"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="background.jpg" width="1080" height="1920"/>
+        <image name="button1.png" width="250" height="60"/>
+    </resources>
+</document>
