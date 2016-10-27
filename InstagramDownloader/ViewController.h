@@ -6,9 +6,10 @@
 //  Copyright © 2016 max kohler. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
+@import WebKit;
 
-@interface ViewController : UIViewController <UIWebViewDelegate, NSURLSessionDownloadDelegate, NSURLSessionDelegate, NSURLSessionTaskDelegate>
+@interface ViewController : UIViewController <UIWebViewDelegate, NSURLSessionDownloadDelegate, NSURLSessionDelegate, NSURLSessionTaskDelegate, WKNavigationDelegate, WKUIDelegate>
 
 
 @end

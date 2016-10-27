@@ -7,7 +7,12 @@
 //
 
 #import "ViewController.h"
-#import <MediaPlayer/MediaPlayer.h>
+#import "WKWebView_WKWebView.h"
+
+@import MediaPlayer;
+@import WebKit;
+@import AVFoundation;
+@import AVKit;
 
 @interface ViewController ()
 
@@ -21,9 +26,11 @@
 
 @property (strong, nonatomic) NSURLSessionDownloadTask *downloadTask;
 @property (nonatomic, strong)NSURLSession *backgroundSession;
-@property (nonatomic, strong)NSString *getURL;
-@property (strong, nonatomic) UIWebView* tempView;
-@property (strong, nonatomic) MPMoviePlayerController *moviePlayer;
+@property (nonatomic, strong)NSString *videoFileURL;
+@property (strong, nonatomic) WKWebView* tempView; //UIWebView
+//@property (strong, nonatomic) MPMoviePlayerController *moviePlayer;
+@property (strong, nonatomic) AVPlayerViewController *avPlayerViewController;
+@property (strong, nonatomic) AVPlayer *avPlayer;
 @property (nonatomic) NSInteger choice;
 @property (nonatomic, strong) UIActivityIndicatorView* waitingIndicator;
 
@@ -39,10 +46,25 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
     
-    _tempView = [[UIWebView alloc]init];
-    _tempView.delegate = self;
+    self.saveButtonOutlet.titleLabel.minimumScaleFactor = 0.5f;
+    self.saveButtonOutlet.titleLabel.numberOfLines = 0;
+    self.saveButtonOutlet.titleLabel.adjustsFontSizeToFitWidth = YES;
+    
+    self.loadButtonOutlet.titleLabel.minimumScaleFactor = 0.5f;
+    self.loadButtonOutlet.titleLabel.numberOfLines = 0;
+    self.loadButtonOutlet.titleLabel.adjustsFontSizeToFitWidth = YES;
+    
+    
+    WKPreferences *preferences = [[WKPreferences alloc] init];
+    preferences.javaScriptEnabled = YES;
+    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    configuration.preferences = preferences;
+    _tempView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
+    _tempView.navigationDelegate = self;
+    _tempView.UIDelegate = self;
+    
+    
     
     
     NSURLSessionConfiguration *backgroundConfigurationObject = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"BackgroundSessionIdentifier"];
@@ -67,11 +89,17 @@
 {
     self.logo.image = nil;
     
-    if(_moviePlayer != nil)
+//    if(_moviePlayer != nil)
+//    {
+//        [_moviePlayer.view removeFromSuperview];
+//        
+//    }
+    if(_avPlayerViewController != nil)
     {
-        [_moviePlayer.view removeFromSuperview];
-        
+        [_avPlayerViewController.view removeFromSuperview];
     }
+    
+    
     //in case you load a second video
     if(_saveButtonOutlet.isEnabled == YES)
     {
@@ -93,6 +121,8 @@
         self.choice = 0;
         NSURL *url = [NSURL URLWithString:pasteboardString];
         NSURLRequest *requestObj = [NSURLRequest requestWithURL:url];
+        
+        
         
         
         [_tempView loadRequest:(requestObj)];
@@ -133,38 +163,94 @@
         [[self loadButtonOutlet] setEnabled:NO];
     }
     
-    self.downloadTask = [[self backgroundSession] downloadTaskWithURL:[NSURL URLWithString:_getURL]];
+    
+    self.downloadTask = [[self backgroundSession] downloadTaskWithURL:[NSURL URLWithString:_videoFileURL]];
     [[self downloadTask] resume];
 }
 
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView
+//- (void)webViewDidFinishLoad:(UIWebView *)webView
+//{
+//    if (webView.isLoading)
+//        return;
+//    else
+//    {
+//        if(self.choice == 0)
+//        {
+//            NSString *js = [NSString stringWithFormat:@"($(\"[property='og:video']\").attr('content'));"];
+//            //_getURL = [self.tempView stringByEvaluatingJavaScriptFromString:js];
+//            _getURL = [_tempView stringByEvaluatingJavaScriptFromString:js];
+//            //NSString *myString = _getURL.absoluteString;
+//            NSLog(@"_getURL= %@",_getURL);
+//            
+//        }
+//        else if (self.choice == 1)
+//        {
+//            NSString *js = [NSString stringWithFormat:@"($(\"[property='twitter:player:stream']\").attr('content'));"];
+//            _getURL = [self.tempView stringByEvaluatingJavaScriptFromString:js];
+//            NSRange range = [_getURL rangeOfString:@"?version"];
+//            NSString *newString = [_getURL substringToIndex:range.location];
+//            
+//            _getURL = newString;
+//            
+//        }
+//        
+//        _moviePlayer = [[MPMoviePlayerController alloc] initWithContentURL: [NSURL URLWithString:_getURL]];
+//        [_moviePlayer prepareToPlay];
+//        [_moviePlayer.view setFrame: self.viewForPlayer.bounds];
+//        [[self viewForPlayer] addSubview: _moviePlayer.view];
+//        _moviePlayer.shouldAutoplay = NO;
+//
+//        [[self saveButtonOutlet] setHidden:NO];
+//        [[self saveButtonOutlet] setEnabled:YES];
+//        [[self loadButtonOutlet] setEnabled:YES];
+//        
+//        [self hideWaitingIndicator];
+//    }
+//}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
+    NSLog(@"didFinishNavigation");
+    
     if (webView.isLoading)
         return;
     else
     {
         if(self.choice == 0)
         {
-            NSString *js = [NSString stringWithFormat:@"($(\"[property='og:video']\").attr('content'));"];
-            _getURL = [self.tempView stringByEvaluatingJavaScriptFromString:js];
+            NSString *js = [NSString stringWithFormat:@"document.head.querySelector('[property=\"og:video:secure_url\"]').content;"];
+            NSLog(@"js= %@",js);
+            
+            _videoFileURL = [_tempView stringByEvaluatingJavaScriptFromString:js];
+            NSLog(@"_videoFileURL= %@",_videoFileURL);
+            
         }
         else if (self.choice == 1)
         {
-            NSString *js = [NSString stringWithFormat:@"($(\"[property='twitter:player:stream']\").attr('content'));"];
-            _getURL = [self.tempView stringByEvaluatingJavaScriptFromString:js];
-            NSRange range = [_getURL rangeOfString:@"?version"];
-            NSString *newString = [_getURL substringToIndex:range.location];
+            NSString *js = [NSString stringWithFormat:@"document.head.querySelector('[property=\"twitter:player:stream\"]').content;"];
+            _videoFileURL = [self.tempView stringByEvaluatingJavaScriptFromString:js];
+            NSRange range = [_videoFileURL rangeOfString:@"?version"];
+            NSString *newString = [_videoFileURL substringToIndex:range.location];
             
-            _getURL = newString;
+            _videoFileURL = newString;
+            
         }
         
-        _moviePlayer = [[MPMoviePlayerController alloc] initWithContentURL: [NSURL URLWithString:_getURL]];
-        [_moviePlayer prepareToPlay];
-        [_moviePlayer.view setFrame: self.viewForPlayer.bounds];
-        [[self viewForPlayer] addSubview: _moviePlayer.view];
-        _moviePlayer.shouldAutoplay = NO;
-
+        _avPlayer = [AVPlayer playerWithURL: [NSURL URLWithString:_videoFileURL]];
+        //_avPlayerViewController = [[AVPlayerViewController alloc]init];
+        _avPlayerViewController = [AVPlayerViewController new];
+        _avPlayerViewController.player = _avPlayer;
+        [_avPlayerViewController.view setFrame: self.viewForPlayer.bounds];
+        [[self viewForPlayer] addSubview: _avPlayerViewController.view];
+        [self addChildViewController:_avPlayerViewController];
+        
+//        _moviePlayer = [[MPMoviePlayerController alloc] initWithContentURL: [NSURL URLWithString:_getURL]];
+//        [_moviePlayer prepareToPlay];
+//        [_moviePlayer.view setFrame: self.viewForPlayer.bounds];
+//        [[self viewForPlayer] addSubview: _moviePlayer.view];
+//        _moviePlayer.shouldAutoplay = NO;
+        
         [[self saveButtonOutlet] setHidden:NO];
         [[self saveButtonOutlet] setEnabled:YES];
         [[self loadButtonOutlet] setEnabled:YES];
@@ -172,7 +258,6 @@
         [self hideWaitingIndicator];
     }
 }
-
 
 -(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
@@ -199,6 +284,16 @@
     return YES;
 }
 
+//
+//TO DO
+//
+
+//- (void)webView:(WebView *)webView decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id )listener
+//{
+//
+//}
+
+
 -(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 {
     CGFloat percentDone = (double)totalBytesWritten/(double)totalBytesExpectedToWrite;
@@ -211,7 +306,7 @@
     // Either move the data from the location to a permanent location, or do something with the data at that location.
     
     NSURL *documentsURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] firstObject];
-    NSURL *tempURL = [documentsURL URLByAppendingPathComponent:[_getURL lastPathComponent]];
+    NSURL *tempURL = [documentsURL URLByAppendingPathComponent:[_videoFileURL lastPathComponent]];
     
     NSData *data = [NSData dataWithContentsOfURL: location];
     
